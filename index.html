@@ -7,117 +7,263 @@
 
   <style>
     :root{
-      --bg:#0e1a24;
-      --card:rgba(255,255,255,.06);
-      --border:rgba(255,255,255,.14);
+      --bg1:#07131d;
+      --bg2:#0e1a24;
+      --card: rgba(255,255,255,.06);
+      --border: rgba(255,255,255,.14);
       --text:#fff;
-      --muted:rgba(255,255,255,.7);
-      --fill:#4da3ff;
+      --muted: rgba(255,255,255,.7);
+      --accent1:#5bbcff;
+      --accent2:#2f7bff;
+      --shadow: 0 20px 60px rgba(0,0,0,.45);
     }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
 
     body{
       margin:0;
-      min-height:100vh;
-      background: radial-gradient(600px 300px at 20% 0%, rgba(77,163,255,.18), transparent 60%), var(--bg);
       color:var(--text);
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       display:flex;
       justify-content:center;
       align-items:center;
+      padding: 22px;
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(91,188,255,.18), transparent 60%),
+        radial-gradient(900px 600px at 85% 0%, rgba(47,123,255,.14), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      overflow-x:hidden;
+    }
+
+    /* grain suave */
+    body:before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+      mix-blend-mode:overlay;
+      opacity:.18;
+    }
+
+    .wrap{
+      width:min(920px, 100%);
+      position:relative;
     }
 
     .card{
-      width:min(760px, 92%);
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:22px;
-      padding:24px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      padding: clamp(18px, 4vw, 30px);
+      box-shadow: var(--shadow);
       backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .card:after{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background: radial-gradient(700px 260px at 18% 0%, rgba(91,188,255,.16), transparent 60%);
+      pointer-events:none;
     }
 
     .top{
       display:flex;
       justify-content:space-between;
-      align-items:flex-end;
-      margin-bottom:10px;
+      align-items:flex-start;
+      gap: 14px;
+      position:relative;
+      z-index:1;
     }
 
-    h1{
+    .title{
       margin:0;
-      font-size: clamp(22px, 5vw, 32px);
+      font-size: clamp(22px, 6vw, 42px);
+      font-weight: 850;
+      letter-spacing: .2px;
     }
 
-    #percent{
-      font-weight:700;
-      color:var(--muted);
+    .subtitle{
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
     }
 
-    .meta{
-      color:var(--muted);
-      font-size:14px;
-      margin-bottom:14px;
+    .actions{
+      display:flex;
+      gap: 10px;
+      align-items:center;
     }
 
-    .grid{
+    .btn{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor:pointer;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:hover{ background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.22); }
+    .btn:active{ transform: scale(.98); }
+
+    /* contador */
+    .countdown{
+      margin-top: 18px;
       display:grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap:8px;
-      margin-bottom:14px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: clamp(10px, 2.5vw, 16px);
+      position:relative;
+      z-index:1;
     }
 
-    .dot{
-      width:16px;
-      aspect-ratio:1;
-      border-radius:50%;
-      border:1px solid rgba(255,255,255,.3);
+    .unit{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.12);
+      border-radius: 20px;
+      padding: 14px 12px 12px;
+      position:relative;
+      overflow:hidden;
     }
 
-    .filled{
-      background:var(--fill);
-      border-color:var(--fill);
-      animation: pop .4s ease-out;
+    .unit:before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: radial-gradient(280px 120px at 25% 0%, rgba(91,188,255,.14), transparent 70%);
+      pointer-events:none;
+      opacity:.9;
     }
 
-    .current{
-      border-color:var(--fill);
-      animation:pulse 1.2s infinite;
+    .value{
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1;
+      font-size: clamp(28px, 8vw, 56px);
+      font-weight: 900;
+      letter-spacing: .5px;
+      line-height: 1;
+      display:flex;
+      align-items:baseline;
+      justify-content:center;
+      gap: 6px;
+      text-shadow: 0 12px 34px rgba(0,0,0,.45);
     }
 
-    @keyframes pop{
-      0%{transform:scale(.8)}
-      60%{transform:scale(1.2)}
-      100%{transform:scale(1)}
-    }
-
-    @keyframes pulse{
-      0%,100%{transform:scale(1)}
-      50%{transform:scale(1.25)}
-    }
-
-    #remaining{
+    .value span{
+      display:inline-block;
+      padding: 6px 10px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(91,188,255,.14), rgba(47,123,255,.10));
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 12px 26px rgba(47,123,255,.10);
+      min-width: 2.2ch;
       text-align:center;
-      font-size:18px;
-      color:var(--muted);
+      transform: translateZ(0);
     }
 
-    @media(max-width:420px){
-      .grid{ grid-template-columns: repeat(8, 1fr); }
+    .label{
+      margin-top: 10px;
+      text-align:center;
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    .hint{
+      margin-top: 14px;
+      color: var(--muted);
+      text-align:center;
+      font-size: 14px;
+      position:relative;
+      z-index:1;
+    }
+
+    .liveDot{
+      display:inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      box-shadow: 0 0 0 6px rgba(91,188,255,.12);
+      margin-right: 8px;
+      animation: pulse 1.3s ease-in-out infinite;
+      vertical-align: middle;
+    }
+    @keyframes pulse{
+      0%,100%{ transform: scale(1); opacity:.9; }
+      50%{ transform: scale(1.25); opacity: 1; }
+    }
+
+    /* animación de cambio de dígitos */
+    .tick{
+      animation: tick .18s ease-out;
+    }
+    @keyframes tick{
+      0%{ transform: translateY(4px) scale(.98); filter: brightness(1); }
+      100%{ transform: translateY(0) scale(1); filter: brightness(1.15); }
+    }
+
+    /* responsive */
+    @media (max-width: 560px){
+      .countdown{ grid-template-columns: repeat(2, 1fr); }
+      .actions{ display:none; } /* limpio en celu */
     }
   </style>
 </head>
 
 <body>
-  <div class="card">
-    <div class="top">
-      <h1>Hasta el jueves 18:00</h1>
-      <div id="percent">0%</div>
+  <div class="wrap">
+    <div class="card">
+      <div class="top">
+        <div>
+          <h1 class="title" id="title">Lanzamiento</h1>
+          <div class="subtitle" id="subtitle">Objetivo: —</div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="shareBtn">Compartir</button>
+          <button class="btn" id="copyBtn">Copiar link</button>
+        </div>
+      </div>
+
+      <div class="countdown" aria-label="Cuenta atrás">
+        <div class="unit">
+          <div class="value"><span id="days">00</span></div>
+          <div class="label">Días</div>
+        </div>
+
+        <div class="unit">
+          <div class="value"><span id="hours">00</span></div>
+          <div class="label">Horas</div>
+        </div>
+
+        <div class="unit">
+          <div class="value"><span id="minutes">00</span></div>
+          <div class="label">Minutos</div>
+        </div>
+
+        <div class="unit">
+          <div class="value"><span id="seconds">00</span></div>
+          <div class="label">Segundos</div>
+        </div>
+      </div>
+
+      <div class="hint" id="hint">
+        <span class="liveDot"></span>
+        Actualizando en vivo
+      </div>
     </div>
-
-    <div class="meta" id="meta"></div>
-
-    <div class="grid" id="grid"></div>
-
-    <div id="remaining"></div>
   </div>
 
   <script src="script.js"></script>
