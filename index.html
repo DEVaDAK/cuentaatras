@@ -15,7 +15,7 @@
       --muted: rgba(255,255,255,.72);
       --shadow: 0 20px 60px rgba(0,0,0,.45);
 
-      --brand: #d69824;
+      --brand:#d69824;
       --accent1:#d69824;
       --accent2:#ffcc66;
       --glow: rgba(214,152,36,.15);
@@ -28,7 +28,8 @@
       margin:0;
       min-height:100svh;
       color:var(--text);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+
       display:flex;
       justify-content:center;
       align-items:center;
@@ -37,13 +38,14 @@
       background:
         radial-gradient(1200px 700px at 15% 10%, var(--glow), transparent 60%),
         radial-gradient(900px 600px at 85% 0%, rgba(214,152,36,.10), transparent 55%),
-        linear-gradient(180deg, var(--bg1), var(--bg2));
+        linear-gradient(180deg,var(--bg1),var(--bg2));
 
       overflow-x:hidden;
-      transition: background 0.6s linear, filter 0.4s ease;
+      transition: background .6s linear, filter .4s ease;
     }
 
-    body:before{
+    /* ===== grain ===== */
+    body::before{
       content:"";
       position:fixed;
       inset:0;
@@ -51,9 +53,51 @@
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
       mix-blend-mode:overlay;
       opacity:.18;
+      z-index:0;
     }
 
-    .wrap{ width:min(940px,100%); display:flex; justify-content:center; }
+    /* ===== ondas doradas ===== */
+    body::after{
+      content:"";
+      position:fixed;
+      inset:-20%;
+      pointer-events:none;
+      background:
+        radial-gradient(60% 40% at 20% 30%, rgba(214,152,36,.12), transparent 60%),
+        radial-gradient(50% 35% at 80% 70%, rgba(255,204,102,.10), transparent 65%);
+      filter: blur(40px);
+      animation: goldWaves 22s linear infinite;
+      z-index:0;
+    }
+
+    @keyframes goldWaves{
+      0%   { transform: translate(0,0) rotate(0deg); }
+      50%  { transform: translate(-4%,3%) rotate(6deg); }
+      100% { transform: translate(0,0) rotate(0deg); }
+    }
+
+    /* ===== latido fondo ===== */
+    @keyframes backgroundPulse{
+      0%,100%{ filter:brightness(1) saturate(1); }
+      50%{ filter:brightness(1.08) saturate(1.18); }
+    }
+
+    body.pulse{
+      animation:backgroundPulse 6s ease-in-out infinite;
+    }
+    body.pulse-strong{
+      animation:backgroundPulse 3s ease-in-out infinite;
+    }
+
+    /* ===== layout ===== */
+    .wrap{
+      width:min(940px,100%);
+      position:relative;
+      z-index:1;
+      display:flex;
+      justify-content:center;
+    }
+
     .card{
       width:100%;
       max-width:720px;
@@ -66,11 +110,47 @@
       position:relative;
     }
 
-    .top{ display:flex; justify-content:space-between; gap:14px; }
-    .title{ margin:0; font-size:clamp(22px,6vw,42px); font-weight:900; }
-    .subtitle{ margin-top:8px; color:var(--muted); font-size:14px; }
+    /* ===== vibración card ===== */
+    @keyframes cardVibe{
+      0%{transform:translate(0,0);}
+      20%{transform:translate(-0.6px,0.4px);}
+      40%{transform:translate(0.6px,-0.4px);}
+      60%{transform:translate(-0.4px,-0.6px);}
+      80%{transform:translate(0.4px,0.6px);}
+      100%{transform:translate(0,0);}
+    }
 
-    .actions{ display:flex; gap:10px; flex-wrap:wrap; }
+    .card.vibe{
+      animation:cardVibe .9s linear infinite;
+    }
+    .card.vibe-strong{
+      animation:cardVibe .45s linear infinite;
+    }
+
+    .top{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+    }
+
+    .title{
+      margin:0;
+      font-size:clamp(22px,6vw,42px);
+      font-weight:900;
+    }
+
+    .subtitle{
+      margin-top:8px;
+      font-size:14px;
+      color:var(--muted);
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
     .btn{
       border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.06);
@@ -92,25 +172,26 @@
       border-radius:20px;
       padding:14px;
       background:rgba(0,0,0,.15);
-      position:relative;
-      overflow:hidden;
+      text-align:center;
     }
 
     .value{
       font-size:clamp(32px,8vw,60px);
       font-weight:950;
-      text-align:center;
     }
 
     .label{
       margin-top:6px;
-      text-align:center;
       font-size:13px;
-      color:var(--muted);
       text-transform:uppercase;
+      color:var(--muted);
     }
 
-    .hint{ margin-top:14px; text-align:center; color:var(--muted); }
+    .hint{
+      margin-top:14px;
+      text-align:center;
+      color:var(--muted);
+    }
 
     .liveDot{
       display:inline-block;
@@ -119,14 +200,15 @@
       border-radius:50%;
       background:linear-gradient(135deg,var(--accent1),var(--accent2));
       margin-right:8px;
-      animation:pulse 1.2s infinite;
+      animation:pulseDot 1.2s infinite;
     }
 
-    @keyframes pulse{
+    @keyframes pulseDot{
       0%,100%{transform:scale(1);}
       50%{transform:scale(1.4);}
     }
 
+    /* ===== overlay T-10 ===== */
     .overlay{
       position:fixed;
       inset:0;
@@ -141,8 +223,8 @@
     .overlayCard{
       padding:28px;
       border-radius:28px;
-      text-align:center;
       background:rgba(255,255,255,.08);
+      text-align:center;
     }
 
     .bigNumber{
@@ -169,38 +251,40 @@
 </head>
 
 <body>
-<canvas id="confetti"></canvas>
+  <canvas id="confetti"></canvas>
 
-<div class="wrap">
-  <div class="card">
-    <div class="top">
-      <div>
-        <h1 class="title" id="title">Lanzamiento NuestraZona</h1>
-        <div class="subtitle" id="subtitle"></div>
+  <div class="wrap">
+    <div class="card">
+      <div class="top">
+        <div>
+          <h1 class="title">Lanzamiento NuestraZona</h1>
+          <div class="subtitle" id="subtitle"></div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="copyBtn">Copiar link</button>
+        </div>
       </div>
-      <div class="actions">
-        <button class="btn" id="copyBtn">Copiar link</button>
+
+      <div class="countdown">
+        <div class="unit"><div class="value" id="days">0</div><div class="label">Días</div></div>
+        <div class="unit"><div class="value" id="hours">00</div><div class="label">Horas</div></div>
+        <div class="unit"><div class="value" id="minutes">00</div><div class="label">Min</div></div>
+        <div class="unit"><div class="value" id="seconds">00</div><div class="label">Seg</div></div>
+      </div>
+
+      <div class="hint" id="hint">
+        <span class="liveDot"></span>Actualizando en vivo
       </div>
     </div>
+  </div>
 
-    <div class="countdown">
-      <div class="unit"><div class="value" id="days">0</div><div class="label">Días</div></div>
-      <div class="unit"><div class="value" id="hours">00</div><div class="label">Horas</div></div>
-      <div class="unit"><div class="value" id="minutes">00</div><div class="label">Min</div></div>
-      <div class="unit"><div class="value" id="seconds">00</div><div class="label">Seg</div></div>
+  <div class="overlay" id="overlay">
+    <div class="overlayCard">
+      <div class="bigNumber" id="bigNumber">10</div>
+      <div>Prepárate 🚀</div>
     </div>
-
-    <div class="hint" id="hint"><span class="liveDot"></span>Actualizando en vivo</div>
   </div>
-</div>
 
-<div class="overlay" id="overlay">
-  <div class="overlayCard">
-    <div class="bigNumber" id="bigNumber">10</div>
-    <div>Prepárate 🚀</div>
-  </div>
-</div>
-
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
