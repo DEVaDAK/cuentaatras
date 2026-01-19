@@ -1,290 +1,96 @@
-function pad2(n){ return String(n).padStart(2, "0"); }
-
-function parseTarget() {
-  const p = new URLSearchParams(location.search);
-  const title = p.get("title") || "Lanzamiento";
-
-  // ?to=2026-01-29T18:00 (hora local)
-  const to = p.get("to");
-  if (to) return { target: new Date(to), title };
-
-  // default: próximo jueves 18:00
-  return { target: getNextThursdayAt18(), title };
-}
-
-function getNextThursdayAt18() {
-  const now = new Date();
-  const target = new Date(now);
-
-  const day = now.getDay(); // 0 dom ... 4 jue
-  let daysUntil = (4 - day + 7) % 7;
-
-  target.setHours(18, 0, 0, 0);
-
-  if (day === 4) {
-    if (now < target) daysUntil = 0;
-    else daysUntil = 7;
-  } else if (daysUntil === 0) {
-    daysUntil = 7;
-  }
-
-  target.setDate(now.getDate() + daysUntil);
-  target.setHours(18, 0, 0, 0);
-  return target;
-}
-
-function formatTarget(target) {
-  return target.toLocaleString("es-AR", {
-    weekday: "long",
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-}
-
+const MAX_WINDOW = 72 * 3600; // 72 horas
 const els = {
-  title: document.getElementById("title"),
-  subtitle: document.getElementById("subtitle"),
-  hint: document.getElementById("hint"),
-  d: document.getElementById("days"),
-  h: document.getElementById("hours"),
-  m: document.getElementById("minutes"),
-  s: document.getElementById("seconds"),
-  shareBtn: document.getElementById("shareBtn"),
-  copyBtn: document.getElementById("copyBtn"),
-  overlay: document.getElementById("overlay"),
-  bigNumber: document.getElementById("bigNumber"),
-  overlayText: document.getElementById("overlayText"),
+  d: days,
+  h: hours,
+  m: minutes,
+  s: seconds,
+  subtitle,
+  hint,
+  overlay,
+  bigNumber
 };
 
-function setDigit(el, value) {
-  if (el.textContent !== value) {
-    el.textContent = value;
-    el.classList.remove("tick");
-    void el.offsetWidth;
-    el.classList.add("tick");
-  }
-}
+function pad(n){ return String(n).padStart(2,"0"); }
 
-/* fases: siempre alrededor del dorado */
-function setPhase(secondsLeft){
-  const body = document.body;
-  body.classList.remove("phase-blue","phase-violet","phase-orange");
-
-  // >24h: gold clean
-  if (secondsLeft > 24 * 3600) body.classList.add("phase-blue");
-  // <=24h y >1h: gold + violeta (más hype)
-  else if (secondsLeft > 3600) body.classList.add("phase-violet");
-  // <=1h: gold intenso
-  else body.classList.add("phase-orange");
-}
-
-/* ---------- T-10 Overlay ---------- */
-let overlayShown = false;
-let lastFinalSecond = null;
-
-function maybeShowFinalCountdown(secondsLeft){
-  if (secondsLeft <= 10 && secondsLeft > 0) {
-    if (!overlayShown) {
-      els.overlay.classList.add("show");
-      overlayShown = true;
-    }
-    const s = Math.ceil(secondsLeft);
-    if (s !== lastFinalSecond) {
-      els.bigNumber.textContent = String(s);
-      els.bigNumber.style.animation = "none";
-      void els.bigNumber.offsetWidth;
-      els.bigNumber.style.animation = "";
-      lastFinalSecond = s;
-    }
-    els.overlayText.textContent = "Prepárate 🚀";
-  } else {
-    if (overlayShown && secondsLeft > 10) {
-      els.overlay.classList.remove("show");
-      overlayShown = false;
-      lastFinalSecond = null;
-    }
-  }
-}
-
-/* ---------- Confetti (continuo ~12s) ---------- */
-const confettiCanvas = document.getElementById("confetti");
-const ctx = confettiCanvas.getContext("2d");
-
-function resizeConfetti(){
-  confettiCanvas.width = window.innerWidth * devicePixelRatio;
-  confettiCanvas.height = window.innerHeight * devicePixelRatio;
-  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
-}
-window.addEventListener("resize", resizeConfetti, { passive:true });
-resizeConfetti();
-
-let confettiActive = false;
-let confettiEndAt = 0;
-let particles = [];
-
-function currentAccentColors(){
-  const cs = getComputedStyle(document.body);
-  return {
-    a1: cs.getPropertyValue("--accent1").trim() || "#d69824",
-    a2: cs.getPropertyValue("--accent2").trim() || "#ffcc66",
-  };
-}
-
-function spawnParticles(n){
-  const { a1, a2 } = currentAccentColors();
-  for (let i=0;i<n;i++){
-    particles.push({
-      x: Math.random() * window.innerWidth,
-      y: -20 - Math.random()*120,
-      vx: (Math.random() - 0.5) * 2.4,
-      vy: 2.6 + Math.random() * 3.6,
-      r: 3 + Math.random() * 4.5,
-      rot: Math.random() * Math.PI,
-      vr: (Math.random() - 0.5) * 0.22,
-      a1, a2
-    });
-  }
-}
-
-function startConfetti(durationMs = 12000){
-  confettiActive = true;
-  confettiEndAt = performance.now() + durationMs;
-  particles = [];
-  spawnParticles(Math.min(220, Math.floor(window.innerWidth * 0.35)));
-  requestAnimationFrame(tickConfetti);
-}
-
-function tickConfetti(t){
-  if (!confettiActive) return;
-
-  const remaining = confettiEndAt - t;
-  const fade = Math.max(0, Math.min(1, remaining / 1200));
-
-  ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
-
-  if (t < confettiEndAt) {
-    const rate = Math.max(6, Math.floor(window.innerWidth / 160));
-    spawnParticles(rate);
-  }
-
-  for (let i = particles.length - 1; i >= 0; i--){
-    const p = particles[i];
-    p.x += p.vx;
-    p.y += p.vy;
-    p.rot += p.vr;
-    p.vy += 0.02;
-
-    if (p.x < -40) p.x = window.innerWidth + 40;
-    if (p.x > window.innerWidth + 40) p.x = -40;
-
-    const alpha = fade * 0.95;
-    if (alpha <= 0 || p.y > window.innerHeight + 60) {
-      particles.splice(i,1);
-      continue;
-    }
-
-    ctx.save();
-    ctx.globalAlpha = alpha;
-
-    const grad = ctx.createLinearGradient(p.x, p.y, p.x + 20, p.y + 20);
-    grad.addColorStop(0, p.a1);
-    grad.addColorStop(1, p.a2);
-
-    ctx.translate(p.x, p.y);
-    ctx.rotate(p.rot);
-    ctx.fillStyle = grad;
-    ctx.fillRect(-p.r, -p.r/2, p.r*2.3, p.r);
-    ctx.restore();
-  }
-
-  if (t < confettiEndAt || particles.length > 0) requestAnimationFrame(tickConfetti);
-  else {
-    ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
-    confettiActive = false;
-    particles = [];
-  }
-}
-
-/* ---------- Main loop ---------- */
-let launched = false;
-
-function update() {
-  const { target, title } = parseTarget();
+function getNextThursday18(){
   const now = new Date();
+  const t = new Date(now);
+  const day = now.getDay();
+  let diff = (4 - day + 7) % 7;
+  t.setHours(18,0,0,0);
+  if(day === 4 && now > t) diff = 7;
+  t.setDate(now.getDate() + diff);
+  return t;
+}
 
-  els.title.textContent = title;
-  els.subtitle.textContent = `Objetivo: ${formatTarget(target)}`;
+const target = getNextThursday18();
+els.subtitle.textContent = `Objetivo: ${target.toLocaleString("es-AR")}`;
 
-  let diffMs = target - now;
+function mix(a,b,p){
+  return `rgb(${a.map((v,i)=>Math.round(v+(b[i]-v)*p)).join(",")})`;
+}
 
-  if (diffMs <= 0) {
-    setDigit(els.d, "0");
-    setDigit(els.h, "00");
-    setDigit(els.m, "00");
-    setDigit(els.s, "00");
+let launched=false, last=null;
 
-    els.overlay.classList.remove("show");
-    document.body.classList.add("phase-orange");
+function update(){
+  const now = new Date();
+  let s = Math.floor((target-now)/1000);
 
-    els.hint.innerHTML = "🚀 <strong>¡Lanzado!</strong> • ¡Felicitaciones!";
-    if (!launched) {
-      launched = true;
-      startConfetti(12000); // 12s (premium)
-    }
+  if(s<=0){
+    els.d.textContent=0;
+    els.h.textContent="00";
+    els.m.textContent="00";
+    els.s.textContent="00";
+    els.hint.innerHTML="🚀 <strong>¡Lanzado!</strong>";
+    if(!launched){ launched=true; startConfetti(); }
     return;
   }
 
-  const totalSeconds = Math.floor(diffMs / 1000);
-  const days = Math.floor(totalSeconds / 86400);
-  const hours = Math.floor((totalSeconds % 86400) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
+  const p = Math.min(1, Math.max(0, 1 - s/MAX_WINDOW));
+  const e = Math.pow(p,2.3);
 
-  setPhase(totalSeconds);
-  maybeShowFinalCountdown(totalSeconds);
+  document.body.style.setProperty("--glow",`rgba(214,152,36,${0.15+e*0.6})`);
+  document.body.style.setProperty("--bg1",mix([7,19,29],[60,38,6],e));
+  document.body.style.setProperty("--bg2",mix([14,26,36],[90,60,12],e));
+  document.body.style.setProperty("--accent1",mix([214,152,36],[255,215,130],e));
+  document.body.style.setProperty("--accent2",mix([255,204,102],[255,240,200],e));
 
-  setDigit(els.d, String(days));
-  setDigit(els.h, pad2(hours));
-  setDigit(els.m, pad2(minutes));
-  setDigit(els.s, pad2(seconds));
+  if(s<300) document.body.style.filter="saturate(1.3) contrast(1.15)";
+  else document.body.style.filter="";
 
-  if (totalSeconds <= 3600) els.hint.innerHTML = "<span class='liveDot'></span>Última hora";
-  else if (totalSeconds <= 24*3600) els.hint.innerHTML = "<span class='liveDot'></span>Últimas 24 horas";
-  else els.hint.innerHTML = "<span class='liveDot'></span>Actualizando en vivo";
+  els.d.textContent=Math.floor(s/86400);
+  els.h.textContent=pad(Math.floor(s%86400/3600));
+  els.m.textContent=pad(Math.floor(s%3600/60));
+  els.s.textContent=pad(s%60);
+
+  if(s<=10){
+    els.overlay.classList.add("show");
+    if(s!==last){ els.bigNumber.textContent=s; last=s; }
+  }else els.overlay.classList.remove("show");
 }
 
+setInterval(update,200);
 update();
-setInterval(update, 200);
 
-/* Compartir / copiar */
-if (els.shareBtn) {
-  els.shareBtn.onclick = async () => {
-    const { target, title } = parseTarget();
-    const shareData = {
-      title,
-      text: `${title} — objetivo: ${formatTarget(target)}`,
-      url: location.href
-    };
-    try {
-      if (navigator.share) await navigator.share(shareData);
-      else {
-        await navigator.clipboard.writeText(location.href);
-        alert("Link copiado ✅");
-      }
-    } catch (_) {}
-  };
+/* confetti ultra simple */
+const c=document.getElementById("confetti"),x=c.getContext("2d");
+function startConfetti(){
+  c.width=innerWidth; c.height=innerHeight;
+  let p=[...Array(250)].map(()=>({
+    x:Math.random()*c.width,
+    y:Math.random()*-c.height,
+    v:2+Math.random()*4
+  }));
+  let t=performance.now()+12000;
+  (function loop(){
+    x.clearRect(0,0,c.width,c.height);
+    p.forEach(o=>{
+      o.y+=o.v;
+      x.fillStyle="#ffcc66";
+      x.fillRect(o.x,o.y,4,8);
+    });
+    if(performance.now()<t) requestAnimationFrame(loop);
+  })();
 }
 
-if (els.copyBtn) {
-  els.copyBtn.onclick = async () => {
-    try {
-      await navigator.clipboard.writeText(location.href);
-      alert("Link copiado ✅");
-    } catch (_) {
-      alert("No pude copiar. Copialo manualmente desde la barra del navegador.");
-    }
-  };
-}
+copyBtn.onclick=()=>navigator.clipboard.writeText(location.href);
