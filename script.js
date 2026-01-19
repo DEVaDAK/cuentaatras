@@ -2,16 +2,14 @@ function pad2(n){ return String(n).padStart(2, "0"); }
 
 function parseTarget() {
   const p = new URLSearchParams(location.search);
-
-  // ?title=Gran%20Lanzamiento
   const title = p.get("title") || "Lanzamiento";
 
-  // ?to=2026-01-29T18:00  (hora local)
+  // ?to=2026-01-29T18:00 (hora local)
   const to = p.get("to");
-  if (to) return { target: new Date(to), title, mode: "fixed" };
+  if (to) return { target: new Date(to), title };
 
   // default: próximo jueves 18:00
-  return { target: getNextThursdayAt18(), title, mode: "thursday" };
+  return { target: getNextThursdayAt18(), title };
 }
 
 function getNextThursdayAt18() {
@@ -56,7 +54,6 @@ const els = {
   s: document.getElementById("seconds"),
   shareBtn: document.getElementById("shareBtn"),
   copyBtn: document.getElementById("copyBtn"),
-  fsBtn: document.getElementById("fsBtn"),
   overlay: document.getElementById("overlay"),
   bigNumber: document.getElementById("bigNumber"),
   overlayText: document.getElementById("overlayText"),
@@ -75,11 +72,8 @@ function setPhase(secondsLeft){
   const body = document.body;
   body.classList.remove("phase-blue","phase-violet","phase-orange");
 
-  // >24h: azul
   if (secondsLeft > 24 * 3600) body.classList.add("phase-blue");
-  // <=24h y >1h: violeta
   else if (secondsLeft > 3600) body.classList.add("phase-violet");
-  // <=1h: naranja/rojo
   else body.classList.add("phase-orange");
 }
 
@@ -111,7 +105,7 @@ function maybeShowFinalCountdown(secondsLeft){
   }
 }
 
-/* ---------- Confetti (suave premium) ---------- */
+/* ---------- Confetti (continuo por un rato) ---------- */
 const confettiCanvas = document.getElementById("confetti");
 const ctx = confettiCanvas.getContext("2d");
 
@@ -123,93 +117,96 @@ function resizeConfetti(){
 window.addEventListener("resize", resizeConfetti, { passive:true });
 resizeConfetti();
 
-let confettiRunning = false;
+let confettiActive = false;
+let confettiEndAt = 0;
 let particles = [];
-let confettiStart = 0;
 
-function launchConfetti(){
-  if (confettiRunning) return;
-  confettiRunning = true;
-  confettiStart = performance.now();
-  particles = [];
+function currentAccentColors(){
+  const cs = getComputedStyle(document.body);
+  return {
+    a1: cs.getPropertyValue("--accent1").trim() || "#5bbcff",
+    a2: cs.getPropertyValue("--accent2").trim() || "#2f7bff",
+  };
+}
 
-  const count = Math.min(220, Math.floor(window.innerWidth * 0.35));
-  for (let i=0;i<count;i++){
+function spawnParticles(n){
+  const { a1, a2 } = currentAccentColors();
+  for (let i=0;i<n;i++){
     particles.push({
       x: Math.random() * window.innerWidth,
-      y: -20 - Math.random()*window.innerHeight*0.2,
-      vx: (Math.random() - 0.5) * 2.2,
-      vy: 2.2 + Math.random() * 3.2,
-      r: 3 + Math.random() * 4,
+      y: -20 - Math.random()*120,
+      vx: (Math.random() - 0.5) * 2.4,
+      vy: 2.6 + Math.random() * 3.6,
+      r: 3 + Math.random() * 4.5,
       rot: Math.random() * Math.PI,
-      vr: (Math.random() - 0.5) * 0.2,
+      vr: (Math.random() - 0.5) * 0.22,
       a: 1,
+      a1, a2
     });
   }
+}
+
+function startConfetti(durationMs = 12000){
+  // 12s: celebración pro sin cansar
+  confettiActive = true;
+  confettiEndAt = performance.now() + durationMs;
+  particles = [];
+  spawnParticles(Math.min(220, Math.floor(window.innerWidth * 0.35)));
   requestAnimationFrame(tickConfetti);
 }
 
 function tickConfetti(t){
-  const elapsed = t - confettiStart;
-  const duration = 5200; // ~5s
+  if (!confettiActive) return;
+
+  const remaining = confettiEndAt - t;
+  const fade = Math.max(0, Math.min(1, remaining / 1200)); // último 1.2s se apaga suave
 
   ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
 
-  // fade out
-  const fade = Math.max(0, 1 - elapsed / duration);
+  // “lluvia” continua: mientras esté activo, seguimos agregando un poquito
+  if (t < confettiEndAt) {
+    const rate = Math.max(6, Math.floor(window.innerWidth / 160)); // se adapta al ancho
+    spawnParticles(rate);
+  }
 
-  for (const p of particles){
+  // dibujar y mover
+  for (let i = particles.length - 1; i >= 0; i--){
+    const p = particles[i];
     p.x += p.vx;
     p.y += p.vy;
     p.rot += p.vr;
     p.vy += 0.02; // gravedad suave
 
-    // wrap lateral
-    if (p.x < -20) p.x = window.innerWidth + 20;
-    if (p.x > window.innerWidth + 20) p.x = -20;
+    if (p.x < -40) p.x = window.innerWidth + 40;
+    if (p.x > window.innerWidth + 40) p.x = -40;
 
-    const alpha = p.a * fade;
-    if (alpha <= 0) continue;
+    const alpha = fade * 0.95;
+    if (alpha <= 0 || p.y > window.innerHeight + 60) {
+      particles.splice(i,1);
+      continue;
+    }
 
     ctx.save();
     ctx.globalAlpha = alpha;
 
-    // colores ligados a la fase (usa CSS vars)
     const grad = ctx.createLinearGradient(p.x, p.y, p.x + 20, p.y + 20);
-    grad.addColorStop(0, getComputedStyle(document.body).getPropertyValue("--accent1").trim() || "#5bbcff");
-    grad.addColorStop(1, getComputedStyle(document.body).getPropertyValue("--accent2").trim() || "#2f7bff");
+    grad.addColorStop(0, p.a1);
+    grad.addColorStop(1, p.a2);
 
     ctx.translate(p.x, p.y);
     ctx.rotate(p.rot);
     ctx.fillStyle = grad;
-    ctx.fillRect(-p.r, -p.r/2, p.r*2.2, p.r);
+    ctx.fillRect(-p.r, -p.r/2, p.r*2.3, p.r);
     ctx.restore();
   }
 
-  if (elapsed < duration) requestAnimationFrame(tickConfetti);
-  else {
+  if (t < confettiEndAt || particles.length > 0) {
+    requestAnimationFrame(tickConfetti);
+  } else {
     ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
-    confettiRunning = false;
+    confettiActive = false;
     particles = [];
   }
-}
-
-/* ---------- Fullscreen ---------- */
-function updateFsButton(){
-  if (!els.fsBtn) return;
-  els.fsBtn.textContent = document.fullscreenElement ? "Salir" : "Pantalla completa";
-}
-
-if (els.fsBtn){
-  els.fsBtn.onclick = async () => {
-    try{
-      if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
-      else await document.exitFullscreen();
-      updateFsButton();
-    }catch(_){}
-  };
-  document.addEventListener("fullscreenchange", updateFsButton);
-  updateFsButton();
 }
 
 /* ---------- Main loop ---------- */
@@ -230,12 +227,13 @@ function update() {
     setDigit(els.m, "00");
     setDigit(els.s, "00");
 
-    els.hint.innerHTML = "🚀 <strong>¡Lanzado!</strong>";
     els.overlay.classList.remove("show");
+    document.body.classList.add("phase-orange");
 
+    els.hint.innerHTML = "🚀 <strong>¡Lanzado!</strong> • ¡Felicitaciones!";
     if (!launched) {
       launched = true;
-      launchConfetti();
+      startConfetti(12000); // confeti continuo ~12s
     }
     return;
   }
@@ -246,7 +244,6 @@ function update() {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
-  // fases de color + overlay final
   setPhase(totalSeconds);
   maybeShowFinalCountdown(totalSeconds);
 
@@ -255,14 +252,13 @@ function update() {
   setDigit(els.m, pad2(minutes));
   setDigit(els.s, pad2(seconds));
 
-  // hint cambia según fase
   if (totalSeconds <= 3600) els.hint.innerHTML = "<span class='liveDot'></span>Última hora";
   else if (totalSeconds <= 24*3600) els.hint.innerHTML = "<span class='liveDot'></span>Últimas 24 horas";
   else els.hint.innerHTML = "<span class='liveDot'></span>Actualizando en vivo";
 }
 
 update();
-setInterval(update, 200); // suave, se siente premium
+setInterval(update, 200);
 
 // Compartir / copiar
 if (els.shareBtn) {
