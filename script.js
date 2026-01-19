@@ -68,12 +68,16 @@ function setDigit(el, value) {
   }
 }
 
+/* fases: siempre alrededor del dorado */
 function setPhase(secondsLeft){
   const body = document.body;
   body.classList.remove("phase-blue","phase-violet","phase-orange");
 
+  // >24h: gold clean
   if (secondsLeft > 24 * 3600) body.classList.add("phase-blue");
+  // <=24h y >1h: gold + violeta (más hype)
   else if (secondsLeft > 3600) body.classList.add("phase-violet");
+  // <=1h: gold intenso
   else body.classList.add("phase-orange");
 }
 
@@ -105,7 +109,7 @@ function maybeShowFinalCountdown(secondsLeft){
   }
 }
 
-/* ---------- Confetti (continuo por un rato) ---------- */
+/* ---------- Confetti (continuo ~12s) ---------- */
 const confettiCanvas = document.getElementById("confetti");
 const ctx = confettiCanvas.getContext("2d");
 
@@ -124,8 +128,8 @@ let particles = [];
 function currentAccentColors(){
   const cs = getComputedStyle(document.body);
   return {
-    a1: cs.getPropertyValue("--accent1").trim() || "#5bbcff",
-    a2: cs.getPropertyValue("--accent2").trim() || "#2f7bff",
+    a1: cs.getPropertyValue("--accent1").trim() || "#d69824",
+    a2: cs.getPropertyValue("--accent2").trim() || "#ffcc66",
   };
 }
 
@@ -140,14 +144,12 @@ function spawnParticles(n){
       r: 3 + Math.random() * 4.5,
       rot: Math.random() * Math.PI,
       vr: (Math.random() - 0.5) * 0.22,
-      a: 1,
       a1, a2
     });
   }
 }
 
 function startConfetti(durationMs = 12000){
-  // 12s: celebración pro sin cansar
   confettiActive = true;
   confettiEndAt = performance.now() + durationMs;
   particles = [];
@@ -159,23 +161,21 @@ function tickConfetti(t){
   if (!confettiActive) return;
 
   const remaining = confettiEndAt - t;
-  const fade = Math.max(0, Math.min(1, remaining / 1200)); // último 1.2s se apaga suave
+  const fade = Math.max(0, Math.min(1, remaining / 1200));
 
   ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
 
-  // “lluvia” continua: mientras esté activo, seguimos agregando un poquito
   if (t < confettiEndAt) {
-    const rate = Math.max(6, Math.floor(window.innerWidth / 160)); // se adapta al ancho
+    const rate = Math.max(6, Math.floor(window.innerWidth / 160));
     spawnParticles(rate);
   }
 
-  // dibujar y mover
   for (let i = particles.length - 1; i >= 0; i--){
     const p = particles[i];
     p.x += p.vx;
     p.y += p.vy;
     p.rot += p.vr;
-    p.vy += 0.02; // gravedad suave
+    p.vy += 0.02;
 
     if (p.x < -40) p.x = window.innerWidth + 40;
     if (p.x > window.innerWidth + 40) p.x = -40;
@@ -200,9 +200,8 @@ function tickConfetti(t){
     ctx.restore();
   }
 
-  if (t < confettiEndAt || particles.length > 0) {
-    requestAnimationFrame(tickConfetti);
-  } else {
+  if (t < confettiEndAt || particles.length > 0) requestAnimationFrame(tickConfetti);
+  else {
     ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
     confettiActive = false;
     particles = [];
@@ -233,7 +232,7 @@ function update() {
     els.hint.innerHTML = "🚀 <strong>¡Lanzado!</strong> • ¡Felicitaciones!";
     if (!launched) {
       launched = true;
-      startConfetti(12000); // confeti continuo ~12s
+      startConfetti(12000); // 12s (premium)
     }
     return;
   }
@@ -260,7 +259,7 @@ function update() {
 update();
 setInterval(update, 200);
 
-// Compartir / copiar
+/* Compartir / copiar */
 if (els.shareBtn) {
   els.shareBtn.onclick = async () => {
     const { target, title } = parseTarget();
