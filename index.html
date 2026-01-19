@@ -7,17 +7,22 @@
 
   <style>
     :root{
+      /* base */
       --bg1:#07131d;
       --bg2:#0e1a24;
       --card: rgba(255,255,255,.06);
       --border: rgba(255,255,255,.14);
       --text:#fff;
-      --muted: rgba(255,255,255,.7);
+      --muted: rgba(255,255,255,.72);
       --shadow: 0 20px 60px rgba(0,0,0,.45);
 
-      --accent1:#5bbcff;
-      --accent2:#2f7bff;
-      --glow: rgba(91,188,255,.18);
+      /* TU color principal */
+      --brand: #d69824;
+
+      /* acento activo (se reemplaza por fases) */
+      --accent1: #d69824;
+      --accent2: #ffcc66;
+      --glow: rgba(214,152,36,.22);
     }
 
     *{ box-sizing:border-box; }
@@ -25,23 +30,40 @@
 
     body{
       margin:0;
+      min-height: 100svh;              /* clave para móvil */
       color:var(--text);
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
       display:flex;
       justify-content:center;
-      align-items:center;
-      padding: 18px;
+      align-items:center;              /* centrado vertical */
+      padding: 14px;
+
       background:
         radial-gradient(1200px 700px at 15% 10%, var(--glow), transparent 60%),
-        radial-gradient(900px 600px at 85% 0%, rgba(47,123,255,.12), transparent 55%),
+        radial-gradient(900px 600px at 85% 0%, rgba(214,152,36,.10), transparent 55%),
         linear-gradient(180deg, var(--bg1), var(--bg2));
       overflow-x:hidden;
     }
 
-    /* Fases de color */
-    body.phase-blue{ --accent1:#5bbcff; --accent2:#2f7bff; --glow: rgba(91,188,255,.18); }
-    body.phase-violet{ --accent1:#b18cff; --accent2:#6d5bff; --glow: rgba(177,140,255,.18); }
-    body.phase-orange{ --accent1:#ffb86b; --accent2:#ff5a3d; --glow: rgba(255,160,120,.18); }
+    /* fases (todas relacionadas a tu brand) */
+    body.phase-blue{
+      --accent1:#d69824;  /* gold base */
+      --accent2:#ffcc66;  /* gold soft */
+      --glow: rgba(214,152,36,.22);
+    }
+    body.phase-violet{
+      /* complementario “premium”: dorado + violeta profundo */
+      --accent1:#d69824;
+      --accent2:#6d5bff;
+      --glow: rgba(109,91,255,.18);
+    }
+    body.phase-orange{
+      /* final más intenso */
+      --accent1:#ffcc66;
+      --accent2:#d69824;
+      --glow: rgba(255,204,102,.22);
+    }
 
     /* grain suave */
     body:before{
@@ -58,9 +80,13 @@
       width:min(940px, 100%);
       position:relative;
       z-index:1;
+      display:flex;
+      justify-content:center; /* por si el card es más chico */
     }
 
     .card{
+      width:100%;
+      max-width: 720px;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 26px;
@@ -80,7 +106,6 @@
       pointer-events:none;
     }
 
-    /* layout */
     .top{
       display:flex;
       justify-content:space-between;
@@ -128,7 +153,6 @@
     .btn:hover{ background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.22); }
     .btn:active{ transform: scale(.98); }
 
-    /* contador */
     .countdown{
       margin-top: 18px;
       display:grid;
@@ -159,7 +183,7 @@
     .value{
       font-variant-numeric: tabular-nums;
       font-feature-settings: "tnum" 1;
-      font-size: clamp(30px, 8vw, 58px);
+      font-size: clamp(32px, 8vw, 60px);
       font-weight: 950;
       letter-spacing: .5px;
       line-height: 1;
@@ -186,7 +210,7 @@
       border-radius: 16px;
       background: radial-gradient(120px 70px at 30% 0%, var(--glow), transparent 70%);
       pointer-events:none;
-      opacity:.9;
+      opacity:.95;
       mix-blend-mode: screen;
     }
 
@@ -238,7 +262,7 @@
       align-items:center;
       justify-content:center;
       z-index: 9998;
-      background: radial-gradient(800px 500px at 50% 40%, rgba(0,0,0,.35), rgba(0,0,0,.78));
+      background: radial-gradient(800px 500px at 50% 40%, rgba(0,0,0,.35), rgba(0,0,0,.80));
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
     }
@@ -289,11 +313,11 @@
     }
     .overlayText{
       margin-top: 6px;
-      color: rgba(255,255,255,.78);
+      color: rgba(255,255,255,.80);
       font-weight: 750;
     }
 
-    /* Canvas confetti */
+    /* confetti canvas */
     #confetti{
       position: fixed;
       inset: 0;
@@ -301,22 +325,12 @@
       z-index: 9999;
     }
 
-    /* Mejor en celular */
+    /* móvil: centrado + botones full ancho */
     @media (max-width: 560px){
-      body{ padding: 14px; align-items:flex-start; }
-      .card{ border-radius: 22px; }
+      body{ padding: 14px; align-items:center; } /* centrado real */
       .top{ flex-direction: column; }
-      .actions{
-        width:100%;
-        justify-content:stretch;
-      }
-      .btn{
-        flex: 1;
-        width: 100%;
-        padding: 12px 14px;
-        border-radius: 16px;
-        text-align:center;
-      }
+      .actions{ width:100%; }
+      .btn{ width:100%; padding: 12px 14px; border-radius: 16px; text-align:center; }
       .countdown{ grid-template-columns: repeat(2, 1fr); }
       .unit{ border-radius: 18px; }
     }
