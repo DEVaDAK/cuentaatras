@@ -7,7 +7,6 @@
 
   <style>
     :root{
-      /* base */
       --bg1:#07131d;
       --bg2:#0e1a24;
       --card: rgba(255,255,255,.06);
@@ -16,13 +15,10 @@
       --muted: rgba(255,255,255,.72);
       --shadow: 0 20px 60px rgba(0,0,0,.45);
 
-      /* TU color principal */
       --brand: #d69824;
-
-      /* acento activo (se reemplaza por fases) */
-      --accent1: #d69824;
-      --accent2: #ffcc66;
-      --glow: rgba(214,152,36,.22);
+      --accent1:#d69824;
+      --accent2:#ffcc66;
+      --glow: rgba(214,152,36,.15);
     }
 
     *{ box-sizing:border-box; }
@@ -30,367 +26,181 @@
 
     body{
       margin:0;
-      min-height: 100svh;              /* clave para móvil */
+      min-height:100svh;
       color:var(--text);
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-
       display:flex;
       justify-content:center;
-      align-items:center;              /* centrado vertical */
-      padding: 14px;
+      align-items:center;
+      padding:14px;
 
       background:
         radial-gradient(1200px 700px at 15% 10%, var(--glow), transparent 60%),
         radial-gradient(900px 600px at 85% 0%, rgba(214,152,36,.10), transparent 55%),
         linear-gradient(180deg, var(--bg1), var(--bg2));
+
       overflow-x:hidden;
+      transition: background 0.6s linear, filter 0.4s ease;
     }
 
-    /* fases (todas relacionadas a tu brand) */
-    body.phase-blue{
-      --accent1:#d69824;  /* gold base */
-      --accent2:#ffcc66;  /* gold soft */
-      --glow: rgba(214,152,36,.22);
-    }
-    body.phase-violet{
-      /* complementario “premium”: dorado + violeta profundo */
-      --accent1:#d69824;
-      --accent2:#6d5bff;
-      --glow: rgba(109,91,255,.18);
-    }
-    body.phase-orange{
-      /* final más intenso */
-      --accent1:#ffcc66;
-      --accent2:#d69824;
-      --glow: rgba(255,204,102,.22);
-    }
-
-    /* grain suave */
     body:before{
       content:"";
       position:fixed;
       inset:0;
       pointer-events:none;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
       mix-blend-mode:overlay;
       opacity:.18;
     }
 
-    .wrap{
-      width:min(940px, 100%);
-      position:relative;
-      z-index:1;
-      display:flex;
-      justify-content:center; /* por si el card es más chico */
-    }
-
+    .wrap{ width:min(940px,100%); display:flex; justify-content:center; }
     .card{
       width:100%;
-      max-width: 720px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 26px;
-      padding: clamp(16px, 4vw, 28px);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      overflow:hidden;
+      max-width:720px;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:26px;
+      padding:clamp(16px,4vw,28px);
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(10px);
       position:relative;
     }
 
-    .card:after{
-      content:"";
-      position:absolute;
-      inset:-2px;
-      background: radial-gradient(700px 260px at 18% 0%, var(--glow), transparent 60%);
-      pointer-events:none;
-    }
+    .top{ display:flex; justify-content:space-between; gap:14px; }
+    .title{ margin:0; font-size:clamp(22px,6vw,42px); font-weight:900; }
+    .subtitle{ margin-top:8px; color:var(--muted); font-size:14px; }
 
-    .top{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap: 14px;
-      position:relative;
-      z-index:1;
-    }
-
-    .title{
-      margin:0;
-      font-size: clamp(22px, 6vw, 42px);
-      font-weight: 880;
-      letter-spacing: .2px;
-    }
-
-    .subtitle{
-      margin: 8px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.35;
-    }
-
-    .actions{
-      display:flex;
-      gap: 10px;
-      align-items:center;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; }
     .btn{
       border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      border-radius: 14px;
-      padding: 10px 12px;
-      font-weight: 800;
-      font-size: 14px;
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      border-radius:14px;
+      padding:10px 14px;
+      font-weight:800;
       cursor:pointer;
-      transition: transform .15s ease, background .15s ease, border-color .15s ease;
-      user-select:none;
-      white-space:nowrap;
     }
-    .btn:hover{ background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.22); }
-    .btn:active{ transform: scale(.98); }
 
     .countdown{
-      margin-top: 18px;
+      margin-top:18px;
       display:grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: clamp(10px, 2.5vw, 16px);
-      position:relative;
-      z-index:1;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
     }
 
     .unit{
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.12);
-      border-radius: 20px;
-      padding: 14px 12px 12px;
+      border-radius:20px;
+      padding:14px;
+      background:rgba(0,0,0,.15);
       position:relative;
       overflow:hidden;
     }
 
-    .unit:before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background: radial-gradient(280px 120px at 25% 0%, var(--glow), transparent 70%);
-      pointer-events:none;
-      opacity:.9;
-    }
-
     .value{
-      font-variant-numeric: tabular-nums;
-      font-feature-settings: "tnum" 1;
-      font-size: clamp(32px, 8vw, 60px);
-      font-weight: 950;
-      letter-spacing: .5px;
-      line-height: 1;
-      display:flex;
-      justify-content:center;
-    }
-
-    .value span{
-      display:inline-block;
-      padding: 6px 10px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
-      border: 1px solid rgba(255,255,255,.10);
-      box-shadow: 0 12px 26px rgba(0,0,0,.18);
-      min-width: 2.2ch;
+      font-size:clamp(32px,8vw,60px);
+      font-weight:950;
       text-align:center;
-      position:relative;
-    }
-
-    .value span:after{
-      content:"";
-      position:absolute;
-      inset:-1px;
-      border-radius: 16px;
-      background: radial-gradient(120px 70px at 30% 0%, var(--glow), transparent 70%);
-      pointer-events:none;
-      opacity:.95;
-      mix-blend-mode: screen;
     }
 
     .label{
-      margin-top: 10px;
+      margin-top:6px;
       text-align:center;
-      color: var(--muted);
-      font-size: 13px;
-      letter-spacing: .5px;
-      text-transform: uppercase;
+      font-size:13px;
+      color:var(--muted);
+      text-transform:uppercase;
     }
 
-    .hint{
-      margin-top: 14px;
-      color: var(--muted);
-      text-align:center;
-      font-size: 14px;
-      position:relative;
-      z-index:1;
-    }
+    .hint{ margin-top:14px; text-align:center; color:var(--muted); }
 
     .liveDot{
       display:inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, var(--accent1), var(--accent2));
-      box-shadow: 0 0 0 6px rgba(255,255,255,.06);
-      margin-right: 8px;
-      animation: pulse 1.3s ease-in-out infinite;
-      vertical-align: middle;
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:linear-gradient(135deg,var(--accent1),var(--accent2));
+      margin-right:8px;
+      animation:pulse 1.2s infinite;
     }
+
     @keyframes pulse{
-      0%,100%{ transform: scale(1); opacity:.9; }
-      50%{ transform: scale(1.25); opacity: 1; }
+      0%,100%{transform:scale(1);}
+      50%{transform:scale(1.4);}
     }
 
-    .tick{ animation: tick .18s ease-out; }
-    @keyframes tick{
-      0%{ transform: translateY(4px) scale(.98); filter: brightness(1); }
-      100%{ transform: translateY(0) scale(1); filter: brightness(1.15); }
-    }
-
-    /* Overlay T-10 */
     .overlay{
-      position: fixed;
-      inset: 0;
+      position:fixed;
+      inset:0;
       display:none;
       align-items:center;
       justify-content:center;
-      z-index: 9998;
-      background: radial-gradient(800px 500px at 50% 40%, rgba(0,0,0,.35), rgba(0,0,0,.80));
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
+      background:rgba(0,0,0,.75);
+      z-index:9998;
     }
     .overlay.show{ display:flex; }
 
     .overlayCard{
-      width:min(560px, 92%);
-      border-radius: 28px;
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.06);
-      box-shadow: 0 30px 90px rgba(0,0,0,.6);
-      padding: 26px 22px;
+      padding:28px;
+      border-radius:28px;
       text-align:center;
-      position:relative;
-      overflow:hidden;
+      background:rgba(255,255,255,.08);
     }
-    .overlayCard:before{
-      content:"";
-      position:absolute;
-      inset:-2px;
-      background: radial-gradient(520px 220px at 35% 0%, var(--glow), transparent 60%);
-      pointer-events:none;
-    }
-    .tminus{
-      color: rgba(255,255,255,.7);
-      font-weight: 850;
-      letter-spacing: .5px;
-      text-transform: uppercase;
-      font-size: 13px;
-    }
+
     .bigNumber{
-      margin-top: 10px;
-      font-variant-numeric: tabular-nums;
-      font-size: clamp(64px, 18vw, 140px);
-      font-weight: 950;
-      line-height: 1;
-      background: linear-gradient(135deg, var(--accent1), var(--accent2));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      text-shadow: 0 24px 60px rgba(0,0,0,.55);
-      animation: boom .45s ease-out;
-    }
-    @keyframes boom{
-      0%{ transform: scale(.85); filter: brightness(1); }
-      60%{ transform: scale(1.08); filter: brightness(1.25); }
-      100%{ transform: scale(1); filter: brightness(1); }
-    }
-    .overlayText{
-      margin-top: 6px;
-      color: rgba(255,255,255,.80);
-      font-weight: 750;
+      font-size:clamp(80px,20vw,140px);
+      font-weight:950;
+      background:linear-gradient(135deg,var(--accent1),var(--accent2));
+      -webkit-background-clip:text;
+      color:transparent;
     }
 
-    /* confetti canvas */
     #confetti{
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 9999;
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:9999;
     }
 
-    /* móvil: centrado + botones full ancho */
-    @media (max-width: 560px){
-      body{ padding: 14px; align-items:center; } /* centrado real */
-      .top{ flex-direction: column; }
-      .actions{ width:100%; }
-      .btn{ width:100%; padding: 12px 14px; border-radius: 16px; text-align:center; }
-      .countdown{ grid-template-columns: repeat(2, 1fr); }
-      .unit{ border-radius: 18px; }
+    @media(max-width:560px){
+      .countdown{ grid-template-columns:repeat(2,1fr); }
+      .top{ flex-direction:column; }
+      .btn{ width:100%; }
     }
   </style>
 </head>
 
-<body class="phase-blue">
-  <canvas id="confetti"></canvas>
+<body>
+<canvas id="confetti"></canvas>
 
-  <div class="wrap">
-    <div class="card">
-      <div class="top">
-        <div>
-          <h1 class="title" id="title">Lanzamiento NuestraZona</h1>
-          <div class="subtitle" id="subtitle">Objetivo: —</div>
-        </div>
-
-        <div class="actions">
-          <button class="btn" id="shareBtn">Compartir</button>
-          <button class="btn" id="copyBtn">Copiar link</button>
-        </div>
+<div class="wrap">
+  <div class="card">
+    <div class="top">
+      <div>
+        <h1 class="title" id="title">Lanzamiento NuestraZona</h1>
+        <div class="subtitle" id="subtitle"></div>
       </div>
-
-      <div class="countdown" aria-label="Cuenta atrás">
-        <div class="unit">
-          <div class="value"><span id="days">00</span></div>
-          <div class="label">Días</div>
-        </div>
-
-        <div class="unit">
-          <div class="value"><span id="hours">00</span></div>
-          <div class="label">Horas</div>
-        </div>
-
-        <div class="unit">
-          <div class="value"><span id="minutes">00</span></div>
-          <div class="label">Minutos</div>
-        </div>
-
-        <div class="unit">
-          <div class="value"><span id="seconds">00</span></div>
-          <div class="label">Segundos</div>
-        </div>
-      </div>
-
-      <div class="hint" id="hint">
-        <span class="liveDot"></span>
-        Actualizando en vivo
+      <div class="actions">
+        <button class="btn" id="copyBtn">Copiar link</button>
       </div>
     </div>
-  </div>
 
-  <div class="overlay" id="overlay">
-    <div class="overlayCard">
-      <div class="tminus">Cuenta atrás final</div>
-      <div class="bigNumber" id="bigNumber">10</div>
-      <div class="overlayText" id="overlayText">Prepárate 🚀</div>
+    <div class="countdown">
+      <div class="unit"><div class="value" id="days">0</div><div class="label">Días</div></div>
+      <div class="unit"><div class="value" id="hours">00</div><div class="label">Horas</div></div>
+      <div class="unit"><div class="value" id="minutes">00</div><div class="label">Min</div></div>
+      <div class="unit"><div class="value" id="seconds">00</div><div class="label">Seg</div></div>
     </div>
-  </div>
 
-  <script src="script.js"></script>
+    <div class="hint" id="hint"><span class="liveDot"></span>Actualizando en vivo</div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="overlayCard">
+    <div class="bigNumber" id="bigNumber">10</div>
+    <div>Prepárate 🚀</div>
+  </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
