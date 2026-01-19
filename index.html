@@ -13,9 +13,12 @@
       --border: rgba(255,255,255,.14);
       --text:#fff;
       --muted: rgba(255,255,255,.7);
+      --shadow: 0 20px 60px rgba(0,0,0,.45);
+
+      /* acentos (se cambian por fases desde JS con clases) */
       --accent1:#5bbcff;
       --accent2:#2f7bff;
-      --shadow: 0 20px 60px rgba(0,0,0,.45);
+      --glow: rgba(91,188,255,.18);
     }
 
     *{ box-sizing:border-box; }
@@ -30,10 +33,21 @@
       align-items:center;
       padding: 22px;
       background:
-        radial-gradient(1200px 700px at 15% 10%, rgba(91,188,255,.18), transparent 60%),
-        radial-gradient(900px 600px at 85% 0%, rgba(47,123,255,.14), transparent 55%),
+        radial-gradient(1200px 700px at 15% 10%, var(--glow), transparent 60%),
+        radial-gradient(900px 600px at 85% 0%, rgba(47,123,255,.12), transparent 55%),
         linear-gradient(180deg, var(--bg1), var(--bg2));
       overflow-x:hidden;
+    }
+
+    /* Fases de color */
+    body.phase-blue{
+      --accent1:#5bbcff; --accent2:#2f7bff; --glow: rgba(91,188,255,.18);
+    }
+    body.phase-violet{
+      --accent1:#b18cff; --accent2:#6d5bff; --glow: rgba(177,140,255,.18);
+    }
+    body.phase-orange{
+      --accent1:#ffb86b; --accent2:#ff5a3d; --glow: rgba(255,160,120,.18);
     }
 
     /* grain suave */
@@ -50,6 +64,7 @@
     .wrap{
       width:min(920px, 100%);
       position:relative;
+      z-index:1;
     }
 
     .card{
@@ -68,7 +83,7 @@
       content:"";
       position:absolute;
       inset:-2px;
-      background: radial-gradient(700px 260px at 18% 0%, rgba(91,188,255,.16), transparent 60%);
+      background: radial-gradient(700px 260px at 18% 0%, var(--glow), transparent 60%);
       pointer-events:none;
     }
 
@@ -99,6 +114,8 @@
       display:flex;
       gap: 10px;
       align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
     }
 
     .btn{
@@ -107,7 +124,7 @@
       color: var(--text);
       border-radius: 14px;
       padding: 10px 12px;
-      font-weight: 700;
+      font-weight: 800;
       font-size: 14px;
       cursor:pointer;
       transition: transform .15s ease, background .15s ease, border-color .15s ease;
@@ -116,6 +133,12 @@
     }
     .btn:hover{ background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.22); }
     .btn:active{ transform: scale(.98); }
+
+    .btn.primary{
+      border-color: rgba(255,255,255,.12);
+      background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      box-shadow: 0 12px 28px rgba(0,0,0,.18);
+    }
 
     /* contador */
     .countdown{
@@ -140,7 +163,7 @@
       content:"";
       position:absolute;
       inset:0;
-      background: radial-gradient(280px 120px at 25% 0%, rgba(91,188,255,.14), transparent 70%);
+      background: radial-gradient(280px 120px at 25% 0%, var(--glow), transparent 70%);
       pointer-events:none;
       opacity:.9;
     }
@@ -155,20 +178,30 @@
       display:flex;
       align-items:baseline;
       justify-content:center;
-      gap: 6px;
-      text-shadow: 0 12px 34px rgba(0,0,0,.45);
     }
 
     .value span{
       display:inline-block;
       padding: 6px 10px;
       border-radius: 16px;
-      background: linear-gradient(135deg, rgba(91,188,255,.14), rgba(47,123,255,.10));
+      background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
       border: 1px solid rgba(255,255,255,.10);
-      box-shadow: 0 12px 26px rgba(47,123,255,.10);
+      box-shadow: 0 12px 26px rgba(0,0,0,.18);
       min-width: 2.2ch;
       text-align:center;
-      transform: translateZ(0);
+      position:relative;
+    }
+
+    /* brillo del acento */
+    .value span:after{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      border-radius: 16px;
+      background: radial-gradient(120px 70px at 30% 0%, var(--glow), transparent 70%);
+      pointer-events:none;
+      opacity:.9;
+      mix-blend-mode: screen;
     }
 
     .label{
@@ -195,7 +228,7 @@
       height: 8px;
       border-radius: 999px;
       background: linear-gradient(135deg, var(--accent1), var(--accent2));
-      box-shadow: 0 0 0 6px rgba(91,188,255,.12);
+      box-shadow: 0 0 0 6px rgba(255,255,255,.06);
       margin-right: 8px;
       animation: pulse 1.3s ease-in-out infinite;
       vertical-align: middle;
@@ -206,23 +239,94 @@
     }
 
     /* animación de cambio de dígitos */
-    .tick{
-      animation: tick .18s ease-out;
-    }
+    .tick{ animation: tick .18s ease-out; }
     @keyframes tick{
       0%{ transform: translateY(4px) scale(.98); filter: brightness(1); }
       100%{ transform: translateY(0) scale(1); filter: brightness(1.15); }
     }
 
+    /* Overlay T-10 */
+    .overlay{
+      position: fixed;
+      inset: 0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index: 9998;
+      background: radial-gradient(800px 500px at 50% 40%, rgba(0,0,0,.35), rgba(0,0,0,.75));
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    .overlay.show{ display:flex; }
+
+    .overlayCard{
+      width:min(560px, 92%);
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      box-shadow: 0 30px 90px rgba(0,0,0,.6);
+      padding: 26px 22px;
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
+    .overlayCard:before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background: radial-gradient(520px 220px at 35% 0%, var(--glow), transparent 60%);
+      pointer-events:none;
+    }
+    .tminus{
+      color: rgba(255,255,255,.7);
+      font-weight: 800;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      font-size: 13px;
+    }
+    .bigNumber{
+      margin-top: 10px;
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(64px, 18vw, 140px);
+      font-weight: 950;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 24px 60px rgba(0,0,0,.55);
+      animation: boom .45s ease-out;
+    }
+    @keyframes boom{
+      0%{ transform: scale(.85); filter: brightness(1); }
+      60%{ transform: scale(1.08); filter: brightness(1.25); }
+      100%{ transform: scale(1); filter: brightness(1); }
+    }
+    .overlayText{
+      margin-top: 6px;
+      color: rgba(255,255,255,.75);
+      font-weight: 700;
+    }
+
+    /* Canvas confetti */
+    #confetti{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
     /* responsive */
     @media (max-width: 560px){
       .countdown{ grid-template-columns: repeat(2, 1fr); }
-      .actions{ display:none; } /* limpio en celu */
+      .actions{ gap: 8px; }
     }
   </style>
 </head>
 
-<body>
+<body class="phase-blue">
+  <canvas id="confetti"></canvas>
+
   <div class="wrap">
     <div class="card">
       <div class="top">
@@ -232,6 +336,7 @@
         </div>
 
         <div class="actions">
+          <button class="btn primary" id="fsBtn">Pantalla completa</button>
           <button class="btn" id="shareBtn">Compartir</button>
           <button class="btn" id="copyBtn">Copiar link</button>
         </div>
@@ -263,6 +368,15 @@
         <span class="liveDot"></span>
         Actualizando en vivo
       </div>
+    </div>
+  </div>
+
+  <!-- Overlay T-10 -->
+  <div class="overlay" id="overlay">
+    <div class="overlayCard">
+      <div class="tminus">Cuenta atrás final</div>
+      <div class="bigNumber" id="bigNumber">10</div>
+      <div class="overlayText" id="overlayText">Prepárate 🚀</div>
     </div>
   </div>
 
