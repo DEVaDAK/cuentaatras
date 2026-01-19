@@ -15,7 +15,6 @@
       --muted: rgba(255,255,255,.7);
       --shadow: 0 20px 60px rgba(0,0,0,.45);
 
-      /* acentos (se cambian por fases desde JS con clases) */
       --accent1:#5bbcff;
       --accent2:#2f7bff;
       --glow: rgba(91,188,255,.18);
@@ -31,7 +30,7 @@
       display:flex;
       justify-content:center;
       align-items:center;
-      padding: 22px;
+      padding: 18px;
       background:
         radial-gradient(1200px 700px at 15% 10%, var(--glow), transparent 60%),
         radial-gradient(900px 600px at 85% 0%, rgba(47,123,255,.12), transparent 55%),
@@ -40,15 +39,9 @@
     }
 
     /* Fases de color */
-    body.phase-blue{
-      --accent1:#5bbcff; --accent2:#2f7bff; --glow: rgba(91,188,255,.18);
-    }
-    body.phase-violet{
-      --accent1:#b18cff; --accent2:#6d5bff; --glow: rgba(177,140,255,.18);
-    }
-    body.phase-orange{
-      --accent1:#ffb86b; --accent2:#ff5a3d; --glow: rgba(255,160,120,.18);
-    }
+    body.phase-blue{ --accent1:#5bbcff; --accent2:#2f7bff; --glow: rgba(91,188,255,.18); }
+    body.phase-violet{ --accent1:#b18cff; --accent2:#6d5bff; --glow: rgba(177,140,255,.18); }
+    body.phase-orange{ --accent1:#ffb86b; --accent2:#ff5a3d; --glow: rgba(255,160,120,.18); }
 
     /* grain suave */
     body:before{
@@ -62,7 +55,7 @@
     }
 
     .wrap{
-      width:min(920px, 100%);
+      width:min(940px, 100%);
       position:relative;
       z-index:1;
     }
@@ -71,7 +64,7 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 26px;
-      padding: clamp(18px, 4vw, 30px);
+      padding: clamp(16px, 4vw, 28px);
       box-shadow: var(--shadow);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
@@ -87,6 +80,7 @@
       pointer-events:none;
     }
 
+    /* layout */
     .top{
       display:flex;
       justify-content:space-between;
@@ -99,7 +93,7 @@
     .title{
       margin:0;
       font-size: clamp(22px, 6vw, 42px);
-      font-weight: 850;
+      font-weight: 880;
       letter-spacing: .2px;
     }
 
@@ -134,12 +128,6 @@
     .btn:hover{ background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.22); }
     .btn:active{ transform: scale(.98); }
 
-    .btn.primary{
-      border-color: rgba(255,255,255,.12);
-      background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
-      box-shadow: 0 12px 28px rgba(0,0,0,.18);
-    }
-
     /* contador */
     .countdown{
       margin-top: 18px;
@@ -171,12 +159,11 @@
     .value{
       font-variant-numeric: tabular-nums;
       font-feature-settings: "tnum" 1;
-      font-size: clamp(28px, 8vw, 56px);
-      font-weight: 900;
+      font-size: clamp(30px, 8vw, 58px);
+      font-weight: 950;
       letter-spacing: .5px;
       line-height: 1;
       display:flex;
-      align-items:baseline;
       justify-content:center;
     }
 
@@ -192,7 +179,6 @@
       position:relative;
     }
 
-    /* brillo del acento */
     .value span:after{
       content:"";
       position:absolute;
@@ -238,7 +224,6 @@
       50%{ transform: scale(1.25); opacity: 1; }
     }
 
-    /* animación de cambio de dígitos */
     .tick{ animation: tick .18s ease-out; }
     @keyframes tick{
       0%{ transform: translateY(4px) scale(.98); filter: brightness(1); }
@@ -253,7 +238,7 @@
       align-items:center;
       justify-content:center;
       z-index: 9998;
-      background: radial-gradient(800px 500px at 50% 40%, rgba(0,0,0,.35), rgba(0,0,0,.75));
+      background: radial-gradient(800px 500px at 50% 40%, rgba(0,0,0,.35), rgba(0,0,0,.78));
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
     }
@@ -279,7 +264,7 @@
     }
     .tminus{
       color: rgba(255,255,255,.7);
-      font-weight: 800;
+      font-weight: 850;
       letter-spacing: .5px;
       text-transform: uppercase;
       font-size: 13px;
@@ -304,8 +289,8 @@
     }
     .overlayText{
       margin-top: 6px;
-      color: rgba(255,255,255,.75);
-      font-weight: 700;
+      color: rgba(255,255,255,.78);
+      font-weight: 750;
     }
 
     /* Canvas confetti */
@@ -316,10 +301,24 @@
       z-index: 9999;
     }
 
-    /* responsive */
+    /* Mejor en celular */
     @media (max-width: 560px){
+      body{ padding: 14px; align-items:flex-start; }
+      .card{ border-radius: 22px; }
+      .top{ flex-direction: column; }
+      .actions{
+        width:100%;
+        justify-content:stretch;
+      }
+      .btn{
+        flex: 1;
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 16px;
+        text-align:center;
+      }
       .countdown{ grid-template-columns: repeat(2, 1fr); }
-      .actions{ gap: 8px; }
+      .unit{ border-radius: 18px; }
     }
   </style>
 </head>
@@ -331,12 +330,11 @@
     <div class="card">
       <div class="top">
         <div>
-          <h1 class="title" id="title">Lanzamiento NuestraZona</h1>
+          <h1 class="title" id="title">Lanzamiento</h1>
           <div class="subtitle" id="subtitle">Objetivo: —</div>
         </div>
 
         <div class="actions">
-          <button class="btn primary" id="fsBtn">Pantalla completa</button>
           <button class="btn" id="shareBtn">Compartir</button>
           <button class="btn" id="copyBtn">Copiar link</button>
         </div>
@@ -371,7 +369,6 @@
     </div>
   </div>
 
-  <!-- Overlay T-10 -->
   <div class="overlay" id="overlay">
     <div class="overlayCard">
       <div class="tminus">Cuenta atrás final</div>
